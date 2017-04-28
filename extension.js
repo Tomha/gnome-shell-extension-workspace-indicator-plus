@@ -31,7 +31,7 @@ const Panel = imports.ui.panel;
 
 const Lang = imports.lang;
 
-// TODO: Allow circuluar scrolling
+// TODO: Settings for icon outline/number/fill colours, position
 
 function WorkspaceIndicator() {
     this._init();
@@ -88,6 +88,8 @@ WorkspaceIndicator.prototype = {
         else if (scrollDirection == Clutter.ScrollDirection.UP) direction = -1;
         else return;
         let index = global.screen.get_active_workspace().index() + direction;
+        if (index == global.screen.n_workspaces) index = 0;
+        else if (index == -1) index = global.screen.n_workspaces - 1;
         this._setWorkspace(index);
     },
 
@@ -125,7 +127,7 @@ WorkspaceIndicator.prototype = {
 
 
         //Main.panel._rightBox.insert_child_at_index(this._button, 3);
-        Main.panel.addToStatusArea('workspace-indicator-plus', this._button, 1);
+        Main.panel.addToStatusArea('workspace-indicator-plus', this._button, 3);
     },
 
     disable: function () {
