@@ -1,9 +1,9 @@
 {
     "description": "Put an indicator on the panel signaling in which workspace you are, and allow you to switch to another.",
-    "name": "Workspace Indicator",
+    "name": "Workspace Indicator Plus",
     "original-authors": [ "erick.red@gmail.com" ],
     "shell-version": [ "3.22", "3.24" ],
-    "url": "https://github.com/Tomha/gnome-shell-extension-workspace-indicator",
-    "uuid": "workspace-indicator@tomha.github.com",
+    "url": "https://github.com/Tomha/gnome-shell-extension-workspace-indicator-plus",
+    "uuid": "workspace-indicator-plus@tomha.github.com",
     "version": 1
 }

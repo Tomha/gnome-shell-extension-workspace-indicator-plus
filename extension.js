@@ -1,164 +1,142 @@
 /* Copyright (C) 2017 Tom Hartill
 
-Modified Tom Hartill 2017 from original code of Gnome Shell Extensions project.
+Based on the original Workspace Indicator code found in the stock Gnome Shell
+Extensions extension set.
 
-extension.js - Part of the Workspace Indicator Gnome Shell Extension.
+extension.js - Part of the Workspace Indicator Plus Gnome Shell Extension.
 
-Workspace Indicator is free software; you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the Free
+Workspace Indicator Plus is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by the Free
 Software Foundation; either version 3 of the License, or (at your option) any
 later version.
 
-Workspace Indicator is distributed in the hope that it will be useful, but
+Workspace Indicator Plus is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 details.
 
 You should have received a copy of the GNU General Public License along with
-Workspace Indicator; if not, see http://www.gnu.org/licenses/.
+Workspace Indicator Plus; if not, see http://www.gnu.org/licenses/.
 
 An up to date version can also be found at:
-https://github.com/Tomha/gnome-shell-extension-workspeed-indicator */
+https://github.com/Tomha/gnome-shell-extension-workspeed-indicator-plus */
 
-const Gio = imports.gi.Gio;
-const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
-const Lang = imports.lang;
-const Mainloop = imports.mainloop;
+
+const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Panel = imports.ui.panel;
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
-const _ = Gettext.gettext;
+const Lang = imports.lang;
 
-const Main = imports.ui.main;
+// TODO: Allow circuluar scrolling
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
+function WorkspaceIndicator() {
+    this._init();
+}
 
-const WORKSPACE_SCHEMA = 'org.gnome.desktop.wm.preferences';
-const WORKSPACE_KEY = 'workspace-names';
-
-const WorkspaceIndicator = new Lang.Class({
-    Name: 'WorkspaceIndicator.WorkspaceIndicator',
-    Extends: PanelMenu.Button,
-
-    _init: function(){
-	this.parent(0.0, _("Workspace Indicator"));
-
-	this._currentWorkspace = global.screen.get_active_workspace().index();
-	this.statusLabel = new St.Label({ y_align: Clutter.ActorAlign.CENTER,
-                                          text: this._labelText() });
-
-	this.actor.add_actor(this.statusLabel);
-
-	this.workspacesItems = [];
-	this._workspaceSection = new PopupMenu.PopupMenuSection();
-	this.menu.addMenuItem(this._workspaceSection);
-
-	this._screenSignals = [];
-	this._screenSignals.push(global.screen.connect_after('workspace-added', Lang.bind(this,this._createWorkspacesSection)));
-	this._screenSignals.push(global.screen.connect_after('workspace-removed', Lang.bind(this,this._createWorkspacesSection)));
-	this._screenSignals.push(global.screen.connect_after('workspace-switched', Lang.bind(this,this._updateIndicator)));
-
-	this.actor.connect('scroll-event', Lang.bind(this, this._onScrollEvent));
-	this._createWorkspacesSection();
-
-	//styling
-	this.statusLabel.add_style_class_name('panel-workspace-indicator');
-
-        this._settings = new Gio.Settings({ schema_id: WORKSPACE_SCHEMA });
-        this._settingsChangedId = this._settings.connect('changed::' + WORKSPACE_KEY, Lang.bind(this, this._createWorkspacesSection));
-    },
-
-    destroy: function() {
-	for (let i = 0; i < this._screenSignals.length; i++)
-	    global.screen.disconnect(this._screenSignals[i]);
-
-        if (this._settingsChangedId) {
-            this._settings.disconnect(this._settingsChangedId);
-            this._settingsChangedId = 0;
-        }
-
-	this.parent();
-    },
-
-    _updateIndicator: function() {
-	this.workspacesItems[this._currentWorkspace].setOrnament(PopupMenu.Ornament.NONE);
-	this._currentWorkspace = global.screen.get_active_workspace().index();
-	this.workspacesItems[this._currentWorkspace].setOrnament(PopupMenu.Ornament.DOT);
-
-	this.statusLabel.set_text(this._labelText());
-    },
-
-    _labelText : function(workspaceIndex) {
-	if(workspaceIndex == undefined) {
-	    workspaceIndex = this._currentWorkspace;
-	    return (workspaceIndex + 1).toString();
-	}
-	return Meta.prefs_get_workspace_name(workspaceIndex);
-    },
+WorkspaceIndicator.prototype = {
 
     _createWorkspacesSection : function() {
-	this._workspaceSection.removeAll();
-	this.workspacesItems = [];
-	this._currentWorkspace = global.screen.get_active_workspace().index();
+	    this._workspaceSection.removeAll();
+	    this._workspaceMenuItems = [];
+	    this._currentWorkspace = global.screen.get_active_workspace().index();
 
-	let i = 0;
-	for(; i < global.screen.n_workspaces; i++) {
-	    this.workspacesItems[i] = new PopupMenu.PopupMenuItem(this._labelText(i));
-	    this._workspaceSection.addMenuItem(this.workspacesItems[i]);
-	    this.workspacesItems[i].workspaceId = i;
-	    this.workspacesItems[i].label_actor = this.statusLabel;
-	    let self = this;
-	    this.workspacesItems[i].connect('activate', Lang.bind(this, function(actor, event) {
-		this._activate(actor.workspaceId);
-	    }));
+	    for(let i = 0; i < global.screen.n_workspaces; i++) {
+	        // TODO: Get workspace name like in original
+	        let newMenuItem = new PopupMenu.PopupMenuItem((i + 1).toString());
+	        newMenuItem.workspaceId = i;
+	        newMenuItem.label_actor = this._label;
 
-	    if (i == this._currentWorkspace)
-		this.workspacesItems[i].setOrnament(PopupMenu.Ornament.DOT);
-	}
+	        this._workspaceMenuItems.push(newMenuItem);
+	        this._workspaceSection.addMenuItem(newMenuItem);
+	        this._workspaceMenuItems[i].connect('activate',
+	            Lang.bind(this, function(actor, event) {
+		            this._setWorkspace(actor.workspaceId);
+	            }));
 
-	this.statusLabel.set_text(this._labelText());
+	        if (i == this._currentWorkspace)
+		        this._workspaceMenuItems[i].setOrnament(PopupMenu.Ornament.DOT);
+	    }
+
+	    this._label.set_text((this._currentWorkspace + 1).toString());
     },
 
-    _activate : function (index) {
-	if(index >= 0 && index <  global.screen.n_workspaces) {
-	    let metaWorkspace = global.screen.get_workspace_by_index(index);
-	    metaWorkspace.activate(global.get_current_time());
-	}
+    _setWorkspace: function (index) {
+	    if(index >= 0 && index <  global.screen.n_workspaces) {
+	        let workspace = global.screen.get_workspace_by_index(index);
+	        workspace.activate(global.get_current_time());
+	    }
     },
 
-    _onScrollEvent : function(actor, event) {
-	let direction = event.get_scroll_direction();
-	let diff = 0;
-	if (direction == Clutter.ScrollDirection.DOWN) {
-	    diff = 1;
-	} else if (direction == Clutter.ScrollDirection.UP) {
-	    diff = -1;
-	} else {
-	    return;
-	}
-
-	let newIndex = global.screen.get_active_workspace().index() + diff;
-	this._activate(newIndex);
+    _updateIndicator: function () {
+	    this._workspaceMenuItems[this._currentWorkspace].setOrnament(
+	        PopupMenu.Ornament.NONE);
+	    this._currentWorkspace = global.screen.get_active_workspace().index();
+	    this._workspaceMenuItems[this._currentWorkspace].setOrnament(
+	        PopupMenu.Ornament.DOT);
+	    this._label.set_text((this._currentWorkspace + 1).toString());
     },
-});
 
-function init(meta) {
-    Convenience.initTranslations();
-}
+    // Event Handler Functions
+    _onButtonScrolled: function (button, event) {
+        let scrollDirection = event.get_scroll_direction();
+        let direction = 0;
+        if (scrollDirection == Clutter.ScrollDirection.DOWN) direction = 1;
+        else if (scrollDirection == Clutter.ScrollDirection.UP) direction = -1;
+        else return;
+        let index = global.screen.get_active_workspace().index() + direction;
+        this._setWorkspace(index);
+    },
 
-let _indicator;
+    // Gnome Shell Functions
+    _init: function () {
+        this._label = new St.Label({style_class: 'panel-workspace-indicator',
+                                    y_align: Clutter.ActorAlign.CENTER});
 
-function enable() {
-    _indicator = new WorkspaceIndicator;
-    Main.panel.addToStatusArea('workspace-indicator', _indicator);
-}
+        this._button = new PanelMenu.Button(0.0, "Workspace Indicator");
+        this._button.actor.add_actor(this._label);
+        this._button.actor.connect('scroll-event',
+                                   Lang.bind(this, this._onButtonScrolled));
 
-function disable() {
-    _indicator.destroy();
+    	this._screenSignals = [];
+	    this._screenSignals.push(global.screen.connect_after(
+	        'workspace-added',
+	        Lang.bind(this,this._createWorkspacesSection)));
+	    this._screenSignals.push(global.screen.connect_after(
+	        'workspace-removed',
+	        Lang.bind(this,this._createWorkspacesSection)));
+	    this._screenSignals.push(global.screen.connect_after(
+	        'workspace-switched',
+	        Lang.bind(this,this._updateIndicator)));
+
+        this._workspaceMenuItems = [];
+	    this._workspaceSection = new PopupMenu.PopupMenuSection();
+	    this._button.menu.addMenuItem(this._workspaceSection);
+	    this._createWorkspacesSection();
+    },
+
+    enable: function () {
+        this._currentWorkspace = global.screen.get_active_workspace().index();
+        this._label.set_text((this._currentWorkspace + 1).toString());
+
+
+
+        //Main.panel._rightBox.insert_child_at_index(this._button, 3);
+        Main.panel.addToStatusArea('workspace-indicator-plus', this._button, 1);
+    },
+
+    disable: function () {
+        this._currentWorkspace = null;
+        for (let i = 0; i < this._screenSignals.length; i++)
+	        global.screen.disconnect(this._screenSignals[i]);
+
+        this._button.destroy();
+    }
+};
+
+function init() {
+    return new WorkspaceIndicator();
 }
