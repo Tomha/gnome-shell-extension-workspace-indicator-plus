@@ -1,4 +1,24 @@
-// -*- mode: js2; indent-tabs-mode: nil; js2-basic-offset: 4 -*-
+/* Copyright (C) 2017 Tom Hartill
+
+Modified Tom Hartill 2017 from original code of Gnome Shell Extensions project.
+
+prefs.js - Part of the Workspace Indicator Gnome Shell Extension.
+
+Workspace Indicator is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 3 of the License, or (at your option) any
+later version.
+
+Workspace Indicator is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+details.
+
+You should have received a copy of the GNU General Public License along with
+Workspace Indicator; if not, see http://www.gnu.org/licenses/.
+
+An up to date version can also be found at:
+https://github.com/Tomha/gnome-shell-extension-workspeed-indicator */
 
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
