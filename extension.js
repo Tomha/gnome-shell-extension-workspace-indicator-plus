@@ -31,6 +31,10 @@ const Panel = imports.ui.panel;
 
 const Lang = imports.lang;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Settings = Me.imports.settings;
+
 // TODO: Settings for icon outline/number/fill colours, position
 
 function WorkspaceIndicator() {
