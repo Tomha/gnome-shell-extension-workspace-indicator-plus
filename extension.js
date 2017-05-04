@@ -94,16 +94,30 @@ WorkspaceIndicator.prototype = {
     },
 
     // Gnome Shell Functions
-    _init: function () {
+    _init: function () { },
+
+    enable: function () {
+        this._currentWorkspace = global.screen.get_active_workspace().index();
+
+        // Create button with label
         this._label = new St.Label({style_class: 'panel-workspace-indicator',
-                                    y_align: Clutter.ActorAlign.CENTER});
+                            y_align: Clutter.ActorAlign.CENTER});
 
         this._button = new PanelMenu.Button(0.0, "Workspace Indicator");
         this._button.actor.add_actor(this._label);
         this._button.actor.connect('scroll-event',
                                    Lang.bind(this, this._onButtonScrolled));
 
-    	this._screenSignals = [];
+        this._label.set_text((this._currentWorkspace + 1).toString());
+
+        // Populate workspace menu
+        this._workspaceMenuItems = [];
+	    this._workspaceSection = new PopupMenu.PopupMenuSection();
+	    this._button.menu.addMenuItem(this._workspaceSection);
+	    this._createWorkspacesSection();
+
+	    // Connect signals for changing workspace
+	    this._screenSignals = [];
 	    this._screenSignals.push(global.screen.connect_after(
 	        'workspace-added',
 	        Lang.bind(this,this._createWorkspacesSection)));
@@ -114,19 +128,7 @@ WorkspaceIndicator.prototype = {
 	        'workspace-switched',
 	        Lang.bind(this,this._updateIndicator)));
 
-        this._workspaceMenuItems = [];
-	    this._workspaceSection = new PopupMenu.PopupMenuSection();
-	    this._button.menu.addMenuItem(this._workspaceSection);
-	    this._createWorkspacesSection();
-    },
-
-    enable: function () {
-        this._currentWorkspace = global.screen.get_active_workspace().index();
-        this._label.set_text((this._currentWorkspace + 1).toString());
-
-
-
-        //Main.panel._rightBox.insert_child_at_index(this._button, 3);
+        // Add the button to the panel
         Main.panel.addToStatusArea('workspace-indicator-plus', this._button, 3);
     },
 
@@ -135,6 +137,8 @@ WorkspaceIndicator.prototype = {
         for (let i = 0; i < this._screenSignals.length; i++)
 	        global.screen.disconnect(this._screenSignals[i]);
 
+        this._workspaceSection.destroy();
+        this._label.destroy();
         this._button.destroy();
     }
 };
