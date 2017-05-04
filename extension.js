@@ -22,6 +22,7 @@ An up to date version can also be found at:
 https://github.com/Tomha/gnome-shell-extension-workspeed-indicator-plus */
 
 const Clutter = imports.gi.Clutter;
+const Meta = imports.gi.Meta;
 const St = imports.gi.St;
 
 const Main = imports.ui.main;
@@ -49,8 +50,7 @@ WorkspaceIndicator.prototype = {
 	    this._currentWorkspace = global.screen.get_active_workspace().index();
 
 	    for(let i = 0; i < global.screen.n_workspaces; i++) {
-	        // TODO: Get workspace name like in original
-	        let newMenuItem = new PopupMenu.PopupMenuItem((i + 1).toString());
+	        let newMenuItem = new PopupMenu.PopupMenuItem(Meta.prefs_get_workspace_name(i));
 	        newMenuItem.workspaceId = i;
 	        newMenuItem.label_actor = this._label;
 
@@ -65,7 +65,7 @@ WorkspaceIndicator.prototype = {
 		        this._workspaceMenuItems[i].setOrnament(PopupMenu.Ornament.DOT);
 	    }
 
-	    this._label.set_text((this._currentWorkspace + 1).toString());
+	    this._label.set_text(Meta.prefs_get_workspace_name(this._currentWorkspace));
     },
 
     _setWorkspace: function (index) {
@@ -81,7 +81,7 @@ WorkspaceIndicator.prototype = {
 	    this._currentWorkspace = global.screen.get_active_workspace().index();
 	    this._workspaceMenuItems[this._currentWorkspace].setOrnament(
 	        PopupMenu.Ornament.DOT);
-	    this._label.set_text((this._currentWorkspace + 1).toString());
+	    this._label.set_text(Meta.prefs_get_workspace_name(this._currentWorkspace));
     },
 
     // Event Handler Functions
@@ -112,7 +112,7 @@ WorkspaceIndicator.prototype = {
         this._button.actor.connect('scroll-event',
                                    Lang.bind(this, this._onButtonScrolled));
 
-        this._label.set_text((this._currentWorkspace + 1).toString());
+        this._label.set_text(Meta.prefs_get_workspace_name(this._currentWorkspace));
 
         // Populate workspace menu
         this._workspaceMenuItems = [];
@@ -120,17 +120,20 @@ WorkspaceIndicator.prototype = {
 	    this._button.menu.addMenuItem(this._workspaceSection);
 	    this._createWorkspacesSection();
 
-	    // Connect signals for changing workspace
+	    // Connect signals
 	    this._screenSignals = [];
 	    this._screenSignals.push(global.screen.connect_after(
 	        'workspace-added',
-	        Lang.bind(this,this._createWorkspacesSection)));
+	        Lang.bind(this, this._createWorkspacesSection)));
 	    this._screenSignals.push(global.screen.connect_after(
 	        'workspace-removed',
-	        Lang.bind(this,this._createWorkspacesSection)));
+	        Lang.bind(this, this._createWorkspacesSection)));
 	    this._screenSignals.push(global.screen.connect_after(
 	        'workspace-switched',
-	        Lang.bind(this,this._updateIndicator)));
+	        Lang.bind(this, this._updateIndicator)));
+
+        this._workspaceSettings = Settings.getSettings("org.gnome.desktop.wm.preferences");
+        this._workspaceSettingsSignal = this._workspaceSettings.connect('changed', Lang.bind(this, this._createWorkspacesSection));
 
         // Add the button to the panel
         Main.panel.addToStatusArea('workspace-indicator-plus', this._button, 3);
