@@ -36,21 +36,32 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
 
-// TODO: Settings for icon outline/number/fill colours, position
+function hexColourToRgb (hexValue) {
+    let colourArray = [];
+    colourArray.push(parseInt(hexValue.slice(1,3), 16).toString());
+    colourArray.push(parseInt(hexValue.slice(3,5), 16).toString());
+    colourArray.push(parseInt(hexValue.slice(5,7), 16).toString());
+    return colourArray;
+}
 
 function WorkspaceIndicator() {
     this._init();
 }
 
 WorkspaceIndicator.prototype = {
+    _createWorkspaceName: function (index) {
+        if(index == null) index = this._currentWorkspace;
+        if(this._useNames) return Meta.prefs_get_workspace_name(index);
+        else return (index + 1).toString();
+    },
 
-    _createWorkspacesSection : function() {
+    _createWorkspacesSection: function () {
 	    this._workspaceSection.removeAll();
 	    this._workspaceMenuItems = [];
 	    this._currentWorkspace = global.screen.get_active_workspace().index();
 
 	    for(let i = 0; i < global.screen.n_workspaces; i++) {
-	        let newMenuItem = new PopupMenu.PopupMenuItem(Meta.prefs_get_workspace_name(i));
+	        let newMenuItem = new PopupMenu.PopupMenuItem(this._createWorkspaceName(i));
 	        newMenuItem.workspaceId = i;
 	        newMenuItem.label_actor = this._label;
 
@@ -65,7 +76,7 @@ WorkspaceIndicator.prototype = {
 		        this._workspaceMenuItems[i].setOrnament(PopupMenu.Ornament.DOT);
 	    }
 
-	    this._label.set_text(Meta.prefs_get_workspace_name(this._currentWorkspace));
+	    this._label.set_text(this._createWorkspaceName());
     },
 
     _setWorkspace: function (index) {
@@ -81,7 +92,113 @@ WorkspaceIndicator.prototype = {
 	    this._currentWorkspace = global.screen.get_active_workspace().index();
 	    this._workspaceMenuItems[this._currentWorkspace].setOrnament(
 	        PopupMenu.Ornament.DOT);
-	    this._label.set_text(Meta.prefs_get_workspace_name(this._currentWorkspace));
+	    this._label.set_text(this._createWorkspaceName());
+    },
+
+    _updateLabelStyle: function () {
+        let style = '';
+        let backgroundColour = hexColourToRgb(this._fillColour);
+        style += 'background-color: rgba(';
+        style += backgroundColour[0] + ', ';
+        style += backgroundColour[1] + ', ';
+        style += backgroundColour[2] + ', ';
+        style += this._fillTransparency.toString() + ');';
+        let borderColour = hexColourToRgb(this._borderColour);
+        style += 'border: ';
+        style += this._borderWidth.toString() + 'px solid rgba(';
+        style += borderColour[0] + ', ';
+        style += borderColour[1] + ', ';
+        style += borderColour[2] + ', ';
+        style += this._borderTransparency.toString() + ');';
+        if(!this._useTextDefault) style += 'color:' + this._textColour;
+        if(this._useFixedWidth) style += 'width:' + this._fixedWidth;
+        this._label.set_style(style);
+    },
+
+    // Settings
+    _loadSettings: function () {
+        this._borderColour = this._settings.get_string('border-colour');
+        this._borderTransparency = this._settings.get_double('border-transparency');
+        this._borderWidth = this._settings.get_int('border-width');
+        this._fillColour = this._settings.get_string('fill-colour');
+        this._fillTransparency = this._settings.get_double('fill-transparency');
+        this._fixedWidth = this._settings.get_int('fixed-width');
+        this._horizontalPadding = this._settings.get_int('horizontal-padding');
+        this._index = this._settings.get_int('index');
+        this._position = this._settings.get_int('position');
+        this._textColour = this._settings.get_string('text-colour');
+        this._useFixedWidth = this._settings.get_boolean('use-fixed-width');
+        this._useNames = this._settings.get_boolean('use-names');
+        this._useTextDefault = this._settings.get_boolean('use-text-default');
+        this._useWorkspaceThumbnails = this._settings.get_boolean('use-workspace-thumbnails');
+        this._verticalPadding = this._settings.get_int('vertical-padding');
+    },
+
+    _onSettingsChanged: function (settings, key) {
+        switch(key) {
+            case 'border-colour':
+                this._borderColour = this._settings.get_string('border-colour');
+                this._updateLabelStyle();
+                break;
+            case 'border-transparency':
+                this._borderTransparency = this._settings.get_double('border-transparency');
+                this._updateLabelStyle();
+                break;
+            case 'border-width':
+                this._borderWidth = this._settings.get_int('border-width');
+                this._updateLabelStyle();
+                break;
+            case 'fill-colour':
+                this._fillColour = this._settings.get_string('fill-colour');
+                this._updateLabelStyle();
+                break;
+            case 'fill-transparency':
+                this._fillTransparency = this._settings.get_double('fill-transparency');
+                this._updateLabelStyle();
+                break;
+            case 'fixed-width':
+                this._fixedWidth = this._settings.get_int('fixed-width');
+                this._updateLabelStyle();
+                break;
+            case 'horizontal-padding':
+                this._horizontalPadding = this._settings.get_int('horizontal-padding');
+                this._updateLabelStyle();
+                break;
+            case 'index':
+                this._index = this._settings.get_int('index');
+                this.disable();
+                this.enable();
+                break;
+            case 'position':
+                this._position = this._settings.get_int('position');
+                this.disable();
+                this.enable();
+                break;
+            case 'text-colour':
+                this._textColour = this._settings.get_string('text-colour');
+                this._updateLabelStyle();
+                break;
+            case 'use-fixed-width':
+                this._useFixedWidth = this._settings.get_boolean('use-fixed-width');
+                this._updateLabelStyle();
+                break;
+            case 'use-names':
+                this._useNames = this._settings.get_boolean('use-names');
+                this._createWorkspacesSection();
+                break;
+            case 'use-text-default':
+                this._useTextDefault = this._settings.get_boolean('use-text-default');
+                this._updateLabelStyle();
+                break;
+            case 'use-workspace-thumbnails':
+                this._useWorkspaceThumbnails = this._settings.get_boolean('use-workspace-thumbnails');
+                // TODO: Workspace thumbnails
+                break;
+            case 'vertical-padding':
+                this._verticalPadding = this._settings.get_int('vertical-padding');
+                this._updateLabelStyle();
+                break;
+        }
     },
 
     // Event Handler Functions
@@ -103,16 +220,19 @@ WorkspaceIndicator.prototype = {
     enable: function () {
         this._currentWorkspace = global.screen.get_active_workspace().index();
 
-        // Create button with label
-        this._label = new St.Label({style_class: 'panel-workspace-indicator',
-                            y_align: Clutter.ActorAlign.CENTER});
+        this._settings = Settings.getSettings();
+        this._settingsSignal = this._settings.connect('changed', Lang.bind(this, this._onSettingsChanged));
+        this._loadSettings();
 
+        // Create button with label
+        this._label = new St.Label({y_align: Clutter.ActorAlign.CENTER});
+        this._updateLabelStyle();
         this._button = new PanelMenu.Button(0.0, "Workspace Indicator");
         this._button.actor.add_actor(this._label);
         this._button.actor.connect('scroll-event',
                                    Lang.bind(this, this._onButtonScrolled));
 
-        this._label.set_text(Meta.prefs_get_workspace_name(this._currentWorkspace));
+        this._label.set_text(this._createWorkspaceName());
 
         // Populate workspace menu
         this._workspaceMenuItems = [];
@@ -136,7 +256,7 @@ WorkspaceIndicator.prototype = {
         this._workspaceSettingsSignal = this._workspaceSettings.connect('changed', Lang.bind(this, this._createWorkspacesSection));
 
         // Add the button to the panel
-        Main.panel.addToStatusArea('workspace-indicator-plus', this._button, 3);
+        Main.panel.addToStatusArea('workspace-indicator-plus', this._button, -1);
     },
 
     disable: function () {
