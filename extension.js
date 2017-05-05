@@ -100,18 +100,19 @@ WorkspaceIndicator.prototype = {
         let backgroundColour = hexColourToRgb(this._fillColour);
         style += 'background-color: rgba(';
         style += backgroundColour[0] + ', ';
-        style += backgroundColour[1] + ', ';
-        style += backgroundColour[2] + ', ';
+        style += backgroundColour[1] + ',';
+        style += backgroundColour[2] + ',';
         style += this._fillTransparency.toString() + ');';
         let borderColour = hexColourToRgb(this._borderColour);
-        style += 'border: ';
+        style += 'border:';
         style += this._borderWidth.toString() + 'px solid rgba(';
-        style += borderColour[0] + ', ';
-        style += borderColour[1] + ', ';
-        style += borderColour[2] + ', ';
+        style += borderColour[0] + ',';
+        style += borderColour[1] + ',';
+        style += borderColour[2] + ',';
         style += this._borderTransparency.toString() + ');';
-        if(!this._useTextDefault) style += 'color:' + this._textColour;
-        if(this._useFixedWidth) style += 'width:' + this._fixedWidth;
+        style += 'padding:' + this._verticalPadding + 'px ' + this._horizontalPadding + 'px;';
+        if(!this._useTextDefault) style += 'color:' + this._textColour + 'px;';
+        if(this._useFixedWidth) style += 'width:' + this._fixedWidth + 'px;';
         this._label.set_style(style);
     },
 
