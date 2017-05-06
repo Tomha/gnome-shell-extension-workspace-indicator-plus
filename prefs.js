@@ -21,6 +21,57 @@ Workspace Indicator Plus; if not, see http://www.gnu.org/licenses/.
 An up to date version can also be found at:
 https://github.com/Tomha/gnome-shell-extension-workspeed-indicator-plus */
 
+const Gtk = imports.gi.Gtk;
+
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Settings = Me.imports.settings;
+
+function WorkspaceIndicatorPrefs () {
+    this._init();
+}
+
+WorkspaceIndicatorPrefs.prototype = {
+    _init: function () {
+        this._builder = new Gtk.Builder();
+        this._builder.add_from_file(Me.path + '/prefs.ui');
+        this.widget = this._builder.get_object('notebook');
+
+        this._populateAbout();
+    },
+
+    _populateAbout: function () {
+        let name = this._builder.get_object('nameLabel');
+        name.set_text(Me.metadata['name'].toString());
+
+        let about = this._builder.get_object('aboutLabel');
+        about.set_text(Me.metadata['description'].toString());
+
+        let version = this._builder.get_object('versionLabel');
+        version.set_text(Me.metadata['version'].toFixed(1).toString());
+
+        let website = this._builder.get_object('websiteLabel');
+        website.set_markup('<a href="' + Me.metadata['url'].toString() + '">' +
+           Me.metadata['name'].toString() + '</a>');
+
+        let licence = this._builder.get_object('licenceLabel');
+        licence.set_markup('<span font="10">' +
+            'This extension comes with absolutely no warranty.\n' +
+            'See the <a href="' +
+            Me.metadata['licence-url'].toString() + '">' +
+            Me.metadata['licence'].toString() + '</a>' +
+            ' or later for details.</span>');
+    }
+};
+
+function buildPrefsWidget () {
+    prefs = new WorkspaceIndicatorPrefs();
+    prefs.widget.show_all();
+    return prefs.widget;
+}
+
+function init (){ }
+
 
 /*
 const Gio = imports.gi.Gio;

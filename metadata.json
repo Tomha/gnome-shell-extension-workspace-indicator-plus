@@ -1,10 +1,12 @@
 {
     "description": "Put an indicator on the panel signaling in which workspace you are, and allow you to switch to another.",
+    "licence": "GNU General Public License, Version 3",
+    "licence-url": "https://www.gnu.org/licenses/gpl-3.0.html",
     "name": "Workspace Indicator Plus",
     "original-authors": [ "erick.red@gmail.com" ],
     "settings-schema": "org.gnome.shell.extensions.workspaceindicatorplus",
     "shell-version": [ "3.22", "3.24" ],
     "url": "https://github.com/Tomha/gnome-shell-extension-workspace-indicator-plus",
     "uuid": "workspace-indicator-plus@tomha.github.com",
-    "version": 1
+    "version": 1.0
 }
