@@ -205,8 +205,6 @@ WorkspaceIndicatorPrefs.prototype = {
         },
 
         backgroundColourChanged: function (button) {
-                    let debug = this._builder.get_object('debug');
-            debug.set_text('test');
             let value = rgbaToHex(button.get_rgba());
             this._settings.set_string('background-colour', value);
             this._settings.apply();

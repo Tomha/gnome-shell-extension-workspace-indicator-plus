@@ -36,12 +36,14 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
 
+// TODO: Font still needs to auto-align center ?
+
 function hexToRgbaString (hex) {
     let string = 'rgba(';
     string += parseInt(hex.slice(1,3), 16).toString() + ','
     string += parseInt(hex.slice(3,5), 16).toString() + ','
     string += parseInt(hex.slice(5,7), 16).toString() + ','
-    string += parseInt(hex.slice(7,9), 16).toString() + ')'
+    string += (parseInt(hex.slice(7,9), 16) / 255).toString() + ')'
     return string;
 }
 
@@ -50,19 +52,13 @@ function WorkspaceIndicator() {
 }
 
 WorkspaceIndicator.prototype = {
-    _createWorkspaceName: function (index) {
-        if(index == null) index = this._currentWorkspace;
-        if(this._useNames) return Meta.prefs_get_workspace_name(index);
-        else return (index + 1).toString();
-    },
-
     _createWorkspacesSection: function () {
 	    this._workspaceSection.removeAll();
 	    this._workspaceMenuItems = [];
 	    this._currentWorkspace = global.screen.get_active_workspace().index();
 
 	    for(let i = 0; i < global.screen.n_workspaces; i++) {
-	        let newMenuItem = new PopupMenu.PopupMenuItem(this._createWorkspaceName(i));
+	        let newMenuItem = new PopupMenu.PopupMenuItem(Meta.prefs_get_workspace_name(i));
 	        newMenuItem.workspaceId = i;
 	        newMenuItem.label_actor = this._label;
 
@@ -77,7 +73,13 @@ WorkspaceIndicator.prototype = {
 		        this._workspaceMenuItems[i].setOrnament(PopupMenu.Ornament.DOT);
 	    }
 
-	    this._label.set_text(this._createWorkspaceName());
+	    this._updateLabelText();
+    },
+
+    _getDesktopBackgroundUri: function () {
+        let fullUri = this._desktopSettings.get_string('picture-uri');
+        let uri = fullUri.split(':')[1]; // too crude?
+        return uri;
     },
 
     _setWorkspace: function (index) {
@@ -93,33 +95,36 @@ WorkspaceIndicator.prototype = {
 	    this._currentWorkspace = global.screen.get_active_workspace().index();
 	    this._workspaceMenuItems[this._currentWorkspace].setOrnament(
 	        PopupMenu.Ornament.DOT);
-	    this._label.set_text(this._createWorkspaceName());
+	    this._updateLabelText();
     },
 
     _updateLabelStyle: function () {
-        //let style = 'text-align:center;'
-        //if(!this._useAutomaticHeight) style += 'min-height:' + this._height.toString() + 'px;';
-        //if(!this._useAutomaticWidth) style += 'min-width:' + this._width.toString() + 'px;';
-        //if(!this._useShellTextColour) style += 'color' + hexToRgbaString(this._textColour) + ';';
-        //if(!this._useShellTextSize) style += 'font-size:' + this._textSize.toString() + 'pt';
-        //style += 'padding:' + this._verticalPadding.toString() + 'px ' + this._horizontalPadding.toString() + 'px;';
-        //style += 'border:' + this._borderWidth.toString() + 'px solid ' + hexToRgbaString(this._borderColour) + ';';
+        let style = 'text-align:center;vertical-align:middle;'
+        if(!this._useAutomaticHeight) style += 'min-height:' + this._height.toString() + 'px;';
+        if(!this._useAutomaticWidth) style += 'min-width:' + this._width.toString() + 'px;';
+        if(!this._useShellTextColour) style += 'color:' + hexToRgbaString(this._textColour) + ';';
+        if(!this._useShellTextSize) style += 'font-size:' + this._textSize.toString() + 'pt;';
+        style += 'padding:' + this._verticalPadding.toString() + 'px ' + this._horizontalPadding.toString() + 'px;';
+        style += 'border:' + this._borderWidth.toString() + 'px solid ' + hexToRgbaString(this._borderColour) + ';';
+        if(this._backgroundStyle == 0)
+            style += 'background-color:' + hexToRgbaString(this._backgroundColour) + ';';
+        else
+            style += 'background-image:url(' + this._getDesktopBackgroundUri() + ');';
+        this._label.set_style(style);
+    },
 
-        //style += 'background-color: ' + hexToRgbaString(this._backgroundColour);
-
-        //let backgroundColour = hexColourToRgb(this._fillColour);
-        //style += 'background-color: rgba(';
-        //style += backgroundColour[0] + ', ';
-        //style += backgroundColour[1] + ',';
-        //style += backgroundColour[2] + ',';
-        //style += this._fillTransparency.toString() + ');';
-
-        //style += 'background-image:url(' + '/home/tom/Pictures/Wallpapers/bvfVmrw.jpg' + ');';
-        //style += 'background-size:30px 30px;'
-
-        //style += 'vertical-align:middle;'
-
-        //this._label.set_style(style);
+    _updateLabelText: function () {
+        switch(this._textStyle) {
+            case 0:
+                this._label.set_text(Meta.prefs_get_workspace_name(this._currentWorkspace));
+                break;
+            case 1:
+                this._label.set_text((this._currentWorkspace + 1).toString());
+                break;
+            case 2:
+                this._label.set_text((this._currentWorkspace + 1).toString() + '/' + global.screen.n_workspaces.toString());
+                break;
+        }
     },
 
     // Settings
@@ -143,30 +148,26 @@ WorkspaceIndicator.prototype = {
         this._width = this._settings.get_int('width');
     },
 
-    /*_onSettingsChanged: function (settings, key) {
+    _onSettingsChanged: function (settings, key) {
         switch(key) {
-            case 'border-colour':
-                this._borderColour = this._settings.get_string('border-colour');
+            case 'background-colour':
+                this._backgroundColour = this._settings.get_string('background-colour');
                 this._updateLabelStyle();
                 break;
-            case 'border-transparency':
-                this._borderTransparency = this._settings.get_double('border-transparency');
+            case 'background-style':
+                this._backgroundStyle = this._settings.get_enum('background-style');
+                this._updateLabelStyle();
+                break;
+            case 'border-colour':
+                this._borderColour = this._settings.get_string('border-colour');
                 this._updateLabelStyle();
                 break;
             case 'border-width':
                 this._borderWidth = this._settings.get_int('border-width');
                 this._updateLabelStyle();
                 break;
-            case 'fill-colour':
-                this._fillColour = this._settings.get_string('fill-colour');
-                this._updateLabelStyle();
-                break;
-            case 'fill-transparency':
-                this._fillTransparency = this._settings.get_double('fill-transparency');
-                this._updateLabelStyle();
-                break;
-            case 'fixed-width':
-                this._fixedWidth = this._settings.get_int('fixed-width');
+            case 'height':
+                this._height = this._settings.get_int('height');
                 this._updateLabelStyle();
                 break;
             case 'horizontal-padding':
@@ -187,28 +188,42 @@ WorkspaceIndicator.prototype = {
                 this._textColour = this._settings.get_string('text-colour');
                 this._updateLabelStyle();
                 break;
-            case 'use-fixed-width':
-                this._useFixedWidth = this._settings.get_boolean('use-fixed-width');
+            case 'text-size':
+                this._textSize = this._settings.get_int('text-size');
                 this._updateLabelStyle();
                 break;
-            case 'use-names':
-                this._useNames = this._settings.get_boolean('use-names');
-                this._createWorkspacesSection();
+            case 'text-style':
+                this._textStyle = this._settings.get_enum('text-style');
+                this._updateLabelText();
                 break;
-            case 'use-text-default':
-                this._useTextDefault = this._settings.get_boolean('use-text-default');
+            case 'use-automatic-height':
+                this._useAutomaticHeight = this._settings.get_boolean('use-automatic-height');
                 this._updateLabelStyle();
                 break;
-            case 'use-workspace-thumbnails':
-                this._useWorkspaceThumbnails = this._settings.get_boolean('use-workspace-thumbnails');
-                // TODO: Workspace thumbnails
+            case 'use-automatic-width':
+                this._useAutomaticWidth = this._settings.get_boolean('use-automatic-width');
+                this._updateLabelStyle();
+                break;
+            case 'use-shell-text-colour':
+                this._useShellTextColour = this._settings.get_boolean('use-shell-text-colour');
+                this._updateLabelStyle();
+                break;
+            case 'use-shell-text-size':
+                this._useShellTextSize = this._settings.get_boolean('use-shell-text-size');
+                this._updateLabelStyle();
                 break;
             case 'vertical-padding':
                 this._verticalPadding = this._settings.get_int('vertical-padding');
                 this._updateLabelStyle();
                 break;
+            case 'width':
+                this._width = this._settings.get_int('width');
+                this._label.set_text('');
+                this._updateLabelStyle();
+                this._updateLabelText();
+                break;
         }
-    },*/
+    },
 
     // Event Handler Functions
     _onButtonScrolled: function (button, event) {
@@ -230,8 +245,13 @@ WorkspaceIndicator.prototype = {
         this._currentWorkspace = global.screen.get_active_workspace().index();
 
         this._settings = Settings.getSettings();
-        //this._settingsSignal = this._settings.connect('changed', Lang.bind(this, this._onSettingsChanged));
+        this._settingsSignal = this._settings.connect('changed', Lang.bind(this, this._onSettingsChanged));
         this._loadSettings();
+
+        this._desktopSettings = Settings.getSettings('org.gnome.desktop.background');
+        this._desktopSettingsSignal = this._desktopSettings.connect('changed', Lang.bind(this, function (settings, key) {
+            if (key == 'picture-uri') this._updateLabelStyle();
+        }));
 
         // Create button with label
         this._label = new St.Label({y_align: Clutter.ActorAlign.CENTER});
@@ -241,7 +261,7 @@ WorkspaceIndicator.prototype = {
         this._button.actor.connect('scroll-event',
                                    Lang.bind(this, this._onButtonScrolled));
 
-        this._label.set_text(this._createWorkspaceName());
+        this._updateLabelText();
 
         // Populate workspace menu
         this._workspaceMenuItems = [];
@@ -272,6 +292,9 @@ WorkspaceIndicator.prototype = {
         this._currentWorkspace = null;
         for (let i = 0; i < this._screenSignals.length; i++)
 	        global.screen.disconnect(this._screenSignals[i]);
+
+        this._settings.disconnect(this._settingsSignal);
+        this._workspaceSettings.disconnect(this._workspaceSettingsSignal);
 
         this._workspaceSection.destroy();
         this._label.destroy();
