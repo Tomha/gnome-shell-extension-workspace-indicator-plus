@@ -36,12 +36,13 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
 
-function hexColourToRgb (hexValue) {
-    let colourArray = [];
-    colourArray.push(parseInt(hexValue.slice(1,3), 16).toString());
-    colourArray.push(parseInt(hexValue.slice(3,5), 16).toString());
-    colourArray.push(parseInt(hexValue.slice(5,7), 16).toString());
-    return colourArray;
+function hexToRgbaString (hex) {
+    let string = 'rgba(';
+    string += parseInt(hex.slice(1,3), 16).toString() + ','
+    string += parseInt(hex.slice(3,5), 16).toString() + ','
+    string += parseInt(hex.slice(5,7), 16).toString() + ','
+    string += parseInt(hex.slice(7,9), 16).toString() + ')'
+    return string;
 }
 
 function WorkspaceIndicator() {
@@ -96,46 +97,53 @@ WorkspaceIndicator.prototype = {
     },
 
     _updateLabelStyle: function () {
-        let style = '';
-        let backgroundColour = hexColourToRgb(this._fillColour);
-        style += 'background-color: rgba(';
-        style += backgroundColour[0] + ', ';
-        style += backgroundColour[1] + ',';
-        style += backgroundColour[2] + ',';
-        style += this._fillTransparency.toString() + ');';
-        let borderColour = hexColourToRgb(this._borderColour);
-        style += 'border:';
-        style += this._borderWidth.toString() + 'px solid rgba(';
-        style += borderColour[0] + ',';
-        style += borderColour[1] + ',';
-        style += borderColour[2] + ',';
-        style += this._borderTransparency.toString() + ');';
-        style += 'padding:' + this._verticalPadding + 'px ' + this._horizontalPadding + 'px;';
-        if(!this._useTextDefault) style += 'color:' + this._textColour + 'px;';
-        if(this._useFixedWidth) style += 'width:' + this._fixedWidth + 'px;';
-        this._label.set_style(style);
+        //let style = 'text-align:center;'
+        //if(!this._useAutomaticHeight) style += 'min-height:' + this._height.toString() + 'px;';
+        //if(!this._useAutomaticWidth) style += 'min-width:' + this._width.toString() + 'px;';
+        //if(!this._useShellTextColour) style += 'color' + hexToRgbaString(this._textColour) + ';';
+        //if(!this._useShellTextSize) style += 'font-size:' + this._textSize.toString() + 'pt';
+        //style += 'padding:' + this._verticalPadding.toString() + 'px ' + this._horizontalPadding.toString() + 'px;';
+        //style += 'border:' + this._borderWidth.toString() + 'px solid ' + hexToRgbaString(this._borderColour) + ';';
+
+        //style += 'background-color: ' + hexToRgbaString(this._backgroundColour);
+
+        //let backgroundColour = hexColourToRgb(this._fillColour);
+        //style += 'background-color: rgba(';
+        //style += backgroundColour[0] + ', ';
+        //style += backgroundColour[1] + ',';
+        //style += backgroundColour[2] + ',';
+        //style += this._fillTransparency.toString() + ');';
+
+        //style += 'background-image:url(' + '/home/tom/Pictures/Wallpapers/bvfVmrw.jpg' + ');';
+        //style += 'background-size:30px 30px;'
+
+        //style += 'vertical-align:middle;'
+
+        //this._label.set_style(style);
     },
 
     // Settings
     _loadSettings: function () {
+        this._backgroundColour = this._settings.get_string('background-colour');
+        this._backgroundStyle = this._settings.get_enum('background-style');
         this._borderColour = this._settings.get_string('border-colour');
-        this._borderTransparency = this._settings.get_double('border-transparency');
         this._borderWidth = this._settings.get_int('border-width');
-        this._fillColour = this._settings.get_string('fill-colour');
-        this._fillTransparency = this._settings.get_double('fill-transparency');
-        this._fixedWidth = this._settings.get_int('fixed-width');
+        this._height = this._settings.get_int('height');
         this._horizontalPadding = this._settings.get_int('horizontal-padding');
         this._index = this._settings.get_int('index');
         this._position = this._settings.get_int('position');
         this._textColour = this._settings.get_string('text-colour');
-        this._useFixedWidth = this._settings.get_boolean('use-fixed-width');
-        this._useNames = this._settings.get_boolean('use-names');
-        this._useTextDefault = this._settings.get_boolean('use-text-default');
-        this._useWorkspaceThumbnails = this._settings.get_boolean('use-workspace-thumbnails');
+        this._textSize = this._settings.get_int('text-size');
+        this._textStyle = this._settings.get_enum('text-style');
+        this._useAutomaticHeight = this._settings.get_boolean('use-automatic-height');
+        this._useAutomaticWidth = this._settings.get_boolean('use-automatic-width');
+        this._useShellTextColour = this._settings.get_boolean('use-shell-text-colour');
+        this._useShellTextSize = this._settings.get_boolean('use-shell-text-size');
         this._verticalPadding = this._settings.get_int('vertical-padding');
+        this._width = this._settings.get_int('width');
     },
 
-    _onSettingsChanged: function (settings, key) {
+    /*_onSettingsChanged: function (settings, key) {
         switch(key) {
             case 'border-colour':
                 this._borderColour = this._settings.get_string('border-colour');
@@ -200,7 +208,7 @@ WorkspaceIndicator.prototype = {
                 this._updateLabelStyle();
                 break;
         }
-    },
+    },*/
 
     // Event Handler Functions
     _onButtonScrolled: function (button, event) {
@@ -222,7 +230,7 @@ WorkspaceIndicator.prototype = {
         this._currentWorkspace = global.screen.get_active_workspace().index();
 
         this._settings = Settings.getSettings();
-        this._settingsSignal = this._settings.connect('changed', Lang.bind(this, this._onSettingsChanged));
+        //this._settingsSignal = this._settings.connect('changed', Lang.bind(this, this._onSettingsChanged));
         this._loadSettings();
 
         // Create button with label

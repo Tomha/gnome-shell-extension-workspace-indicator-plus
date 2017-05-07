@@ -4,7 +4,7 @@
     "licence-url": "https://www.gnu.org/licenses/gpl-3.0.html",
     "name": "Workspace Indicator Plus",
     "original-authors": [ "erick.red@gmail.com" ],
-    "settings-schema": "org.gnome.shell.extensions.workspaceindicatorplus",
+    "settings-schema": "org.gnome.shell.extensions.workspace-indicator-plus",
     "shell-version": [ "3.22", "3.24" ],
     "url": "https://github.com/Tomha/gnome-shell-extension-workspace-indicator-plus",
     "uuid": "workspace-indicator-plus@tomha.github.com",

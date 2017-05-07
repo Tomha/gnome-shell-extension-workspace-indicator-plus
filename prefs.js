@@ -21,11 +21,35 @@ Workspace Indicator Plus; if not, see http://www.gnu.org/licenses/.
 An up to date version can also be found at:
 https://github.com/Tomha/gnome-shell-extension-workspeed-indicator-plus */
 
+const Gdk = imports.gi.Gdk;
 const Gtk = imports.gi.Gtk;
+
+const Lang = imports.lang;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
+
+function hexToRgba (hex) {
+    let colour = new Gdk.RGBA();
+    colour.red = parseInt(hex.slice(1,3), 16) / 255;
+    colour.green = parseInt(hex.slice(3,5), 16) / 255;
+    colour.blue = parseInt(hex.slice(5,7), 16) / 255;
+    colour.alpha = parseInt(hex.slice(7,9), 16) / 255;
+    return colour;
+}
+
+function rgbaToHex (rgba) {
+    let red = (parseInt(rgba.red * 255)).toString(16);
+    if (red.length == 1) red = "0" + red;
+    let green = (parseInt(rgba.green * 255)).toString(16);
+    if (green.length == 1) green = "0" + green;
+    let blue = (parseInt(rgba.blue * 255)).toString(16);
+    if (blue.length == 1) blue = "0" + blue;
+    let alpha = (parseInt(rgba.alpha * 255)).toString(16);
+    if (alpha.length == 1) alpha = "0" + alpha;
+    return "#" + red + green + blue + alpha;
+}
 
 function WorkspaceIndicatorPrefs () {
     this._init();
@@ -37,7 +61,12 @@ WorkspaceIndicatorPrefs.prototype = {
         this._builder.add_from_file(Me.path + '/prefs.ui');
         this.widget = this._builder.get_object('notebook');
 
+        this._settings = Settings.getSettings();
+
+        this._populateAppearance();
         this._populateAbout();
+
+        this._builder.connect_signals_full(Lang.bind(this, this._signalConnector));
     },
 
     _populateAbout: function () {
@@ -61,6 +90,279 @@ WorkspaceIndicatorPrefs.prototype = {
             Me.metadata['licence-url'].toString() + '">' +
             Me.metadata['licence'].toString() + '</a>' +
             ' or later for details.</span>');
+    },
+
+    _populateAppearance : function () {
+        let widget = value = null;
+
+        // Border Colour
+        widget = this._builder.get_object('borderColour');
+        value = this._settings.get_string('border-colour');
+        widget.set_rgba(hexToRgba(value));
+
+        // Border Width
+        widget = this._builder.get_object('borderWidth');
+        value = this._settings.get_int('border-width');
+        widget.set_value(value);
+
+        // Background Colour
+        widget = this._builder.get_object('backgroundColour');
+        value = this._settings.get_string('background-colour');
+        widget.set_rgba(hexToRgba(value));
+
+        // Background Style
+        value = this._settings.get_enum('background-style');
+        switch (value) {
+            case 0:
+                widget = this._builder.get_object('backgroundStyleColour')
+                break;
+            case 1:
+                widget = this._builder.get_object('backgroundStyleImage')
+                break;
+        }
+        widget.set_active(true);
+
+        // Text Colour
+        widget = this._builder.get_object('textColour');
+        value = this._settings.get_string('text-colour');
+        widget.set_rgba(hexToRgba(value));
+
+        // Text Size
+        widget = this._builder.get_object('textSize');
+        value = this._settings.get_int('text-size');
+        widget.set_value(value);
+
+        // Text Style
+        value = this._settings.get_enum('text-style');
+        switch (value) {
+            case 0:
+                widget = this._builder.get_object('textStyleName')
+                break;
+            case 1:
+                widget = this._builder.get_object('textStyleNumber')
+                break;
+            case 2:
+                widget = this._builder.get_object('textStyleNumberTotal')
+        }
+        widget.set_active(true);
+
+        // Width
+        widget = this._builder.get_object('width');
+        value = this._settings.get_int('width');
+        widget.set_value(value);
+
+        // Height
+        widget = this._builder.get_object('height');
+        value = this._settings.get_int('height');
+        widget.set_value(value);
+
+        // Vertical Padding
+        widget = this._builder.get_object('verticalPadding');
+        value = this._settings.get_int('vertical-padding');
+        widget.set_value(value);
+
+        // Horizontal Padding
+        widget = this._builder.get_object('horizontalPadding');
+        value = this._settings.get_int('horizontal-padding');
+        widget.set_value(value);
+
+        // Use Shell Text Colour
+        widget = this._builder.get_object('useShellTextColour');
+        value = this._settings.get_boolean('use-shell-text-colour');
+        widget.set_active(value);
+
+        // Use Shell Text Size
+        widget = this._builder.get_object('useShellTextSize');
+        value = this._settings.get_boolean('use-shell-text-size');
+        widget.set_active(value);
+
+        // Use Automatic Width
+        widget = this._builder.get_object('useAutomaticWidth');
+        value = this._settings.get_boolean('use-automatic-width');
+        widget.set_active(value);
+
+        // Use Automatic Height
+        widget = this._builder.get_object('useAutomaticHeight');
+        value = this._settings.get_boolean('use-automatic-height');
+        widget.set_active(value);
+    },
+
+    _signalConnector: function (builder, object, signal, handler) {
+        object.connect(signal, Lang.bind(this, this._signalHandler[handler]));
+    },
+
+    _signalHandler: {
+        borderColourChanged: function (button) {
+            let value = rgbaToHex(button.get_rgba());
+            this._settings.set_string('border-colour', value);
+            this._settings.apply();
+        },
+
+        borderWidthChanged: function (spinButton) {
+            let value = spinButton.get_value_as_int();
+            this._settings.set_int('border-width', value);
+            this._settings.apply();
+        },
+
+        backgroundColourChanged: function (button) {
+                    let debug = this._builder.get_object('debug');
+            debug.set_text('test');
+            let value = rgbaToHex(button.get_rgba());
+            this._settings.set_string('background-colour', value);
+            this._settings.apply();
+        },
+
+        backgroundStyleChanged: function (toggle) {
+            if(toggle.get_active()) {
+                switch(toggle.get_name()){
+                    case "backgroundStyleColour":
+                        this._settings.set_enum('background-style', 0);
+                        break;
+                    case "backgroundStyleImage":
+                        this._settings.set_enum('background-style', 1);
+                }
+            }
+            this._settings.apply();
+        },
+
+        heightChanged: function (scale) {
+            let value = scale.get_value();
+            this._settings.set_int('height', value);
+            this._settings.apply();
+        },
+
+        horizontalPaddingChanged: function (scale) {
+            let value = scale.get_value();
+            this._settings.set_int('horizontal-padding', value);
+            this._settings.apply();
+        },
+
+        resetBorderColour: function (button) {
+            this._settings.reset('border-colour');
+            let widget = this._builder.get_object('borderColour');
+            let value = this._settings.get_string('border-colour');
+            widget.set_rgba(hexToRgba(value));
+        },
+
+        resetBorderWidth: function (button) {
+            this._settings.reset('border-width');
+            let widget = this._builder.get_object('borderWidth');
+            let value = this._settings.get_int('border-width');
+            widget.set_value(value);
+        },
+
+        resetBackgroundColour: function (button) {
+            this._settings.reset('background-colour');
+            let widget = this._builder.get_object('backgroundColour');
+            let value = this._settings.get_string('background-colour');
+            widget.set_rgba(hexToRgba(value));
+        },
+
+        resetHeight: function (button) {
+            this._settings.reset('height');
+            let widget = this._builder.get_object('height');
+            let value = this._settings.get_int('height');
+            widget.set_value(value);
+        },
+
+        resetHorizontalPadding (button) {
+            this._settings.reset('horizontal-padding');
+            let widget = this._builder.get_object('horizontalPadding');
+            let value = this._settings.get_int('horizontal-padding');
+            widget.set_value(value);
+        },
+
+        resetTextColour: function (button) {
+            this._settings.reset('text-colour');
+            let widget = this._builder.get_object('textColour');
+            let value = this._settings.get_string('text-colour');
+            widget.set_rgba(hexToRgba(value));
+        },
+
+        resetTextSize: function (button) {
+            this._settings.reset('text-size');
+            let widget = this._builder.get_object('textSize');
+            let value = this._settings.get_int('text-size');
+            widget.set_value(value);
+        },
+
+        resetVerticalPadding (button) {
+            this._settings.reset('vertical-padding');
+            let widget = this._builder.get_object('verticalPadding');
+            let value = this._settings.get_int('vertical-padding');
+            widget.set_value(value);
+        },
+
+        resetWidth: function (button) {
+            this._settings.reset('width');
+            let widget = this._builder.get_object('width');
+            let value = this._settings.get_int('width');
+            widget.set_value(value);
+        },
+
+        textColourChanged: function (button) {
+            let value = rgbaToHex(button.get_rgba());
+            this._settings.set_string('text-colour', value);
+            this._settings.apply();
+        },
+
+        textSizeChanged: function (scale) {
+            let value = scale.get_value();
+            this._settings.set_int('text-size', value);
+            this._settings.apply();
+        },
+
+        textStyleChanged: function (toggle) {
+            if(toggle.get_active()) {
+                switch(toggle.get_name()){
+                    case "textStyleName":
+                        this._settings.set_enum('text-style', 0);
+                        break;
+                    case "textStyleNumber":
+                        this._settings.set_enum('text-style', 1);
+                        break;
+                    case "textStyleNumberTotal":
+                        this._settings.set_enum('text-style', 2);
+                }
+            }
+            this._settings.apply();
+        },
+
+        useAutomaticHeightToggled: function (checkbox) {
+            let value = checkbox.get_active();
+            this._settings.set_boolean('use-automatic-height', value);
+            this._settings.apply();
+        },
+
+        useAutomaticWidthToggled: function (checkbox) {
+            let value = checkbox.get_active();
+            this._settings.set_boolean('use-automatic-width', value);
+            this._settings.apply();
+        },
+
+        useShellTextColourToggled: function (checkbox) {
+            let value = checkbox.get_active();
+            this._settings.set_boolean('use-shell-text-colour', value);
+            this._settings.apply();
+        },
+
+        useShellTextSizeToggled: function (checkbox) {
+            let value = checkbox.get_active();
+            this._settings.set_boolean('use-shell-text-size', value);
+            this._settings.apply();
+        },
+
+        verticalPaddingChanged: function (scale) {
+            let value = scale.get_value();
+            this._settings.set_int('vertical-padding', value);
+            this._settings.apply();
+        },
+
+        widthChanged: function (scale) {
+            let value = scale.get_value();
+            this._settings.set_int('width', value);
+            this._settings.apply();
+        },
     }
 };
 
@@ -148,7 +450,7 @@ const WorkspaceNameModel = new GObject.Class({
         let names = this._settings.get_strv(WORKSPACE_KEY);
 
         if (index >= names.length) {
-            // fill with blanks
+            // background with blanks
             for (let i = names.length; i <= index; i++)
                 names[i] = '';
         }

@@ -1,73 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-shell-extensions">
-    <schema path="/org/gnome/shell/extensions/workspaceindicatorplus/" id="org.gnome.shell.extensions.workspaceindicatorplus">
-    <key name="border-colour" type="s">
-        <default>"#cccccc"</default>
-        <summary>Hex colour used for the border.</summary>
-    </key>
-    <key name="border-transparency" type="d">
-        <default>.5</default>
-        <range min="0" max="1"/>
-        <summary>Transparency of the border.</summary>
-    </key>
-    <key name="border-width" type="i">
-        <default>1</default>
-        <range min="0" max="16"/>
-        <summary>Width of the border in pixels.</summary>
-    </key>
-    <key name="fill-colour" type="s">
-        <default>"#c8c8c8"</default>
-        <summary>Hex colour used for the background.</summary>
-    </key>
-    <key name="fill-transparency" type="d">
-        <default>.5</default>
-        <range min="0" max="1"/>
-        <summary>Transparency of the background.</summary>
-    </key>
-    <key name="fixed-width" type="i">
-        <default>64</default>
-        <range min="0" max="256"/>
-        <summary>How many pixels to use as a fixed width for the panel button.</summary>
-    </key>
-    <key name="horizontal-padding" type="i">
-        <default>8</default>
-        <range min="0" max="128"/>
-        <summary>How many pixels to use for padding left and right of the workspace name border.</summary>
-    </key>
-    <key name="index" type="i">
-        <default>0</default>
-        <range min="-1" max="32"/>
-        <summary>The index used to place the panel button within the chosen position.</summary>
-    </key>
-    <key name="position" type="i">
-        <default>1</default>
-        <range min="-1" max="1"/>
-        <summary>Represents the position to place the panel button in, -1, 0, and 1 for left, center, and right respectively.</summary>
-    </key>
-    <key name="text-colour" type="s">
-        <default>"#cccccc"</default>
-        <summary>Hex colour used for the text.</summary>
-    </key>
-    <key name="use-fixed-width" type="b">
-        <default>false</default>
-        <summary>Whether to use a fixed width in pixels to display the panel button.</summary>
-    </key>
-    <key name="use-names" type="b">
-        <default>true</default>
-        <summary>Whether to use workspace names instead of numbers.</summary>
-    </key>
-    <key name="use-text-default" type="b">
-        <default>true</default>
-        <summary>Whether to use the default text colour.</summary>
-    </key>
-    <key name="use-workspace-thumbnails" type="b">
-        <default>true</default>
-        <summary>Whether to display workspace thumbnails in the button menu.</summary>
-    </key>
-    <key name="vertical-padding" type="i">
-        <default>8</default>
-        <range min="0" max="128"/>
-        <summary>How many pixels to use for padding above and below the workspace name border. </summary>
-    </key>
+    <enum id="org.gnome.shell.extensions.workspace-indicator-plus.background-style">
+        <value value="0" nick="COLOUR"/>
+        <value value="1" nick="IMAGE"/>
+    </enum>
+    <enum id="org.gnome.shell.extensions.workspace-indicator-plus.text-style">
+        <value value="0" nick="NAME"/>
+        <value value="1" nick="NUMBER"/>
+        <value value="2" nick="FRACTION"/>
+
+    </enum>
+    <schema path="/org/gnome/shell/extensions/workspaceindicatorplus/" id="org.gnome.shell.extensions.workspace-indicator-plus">
+        <key name="background-colour" type="s">
+            <default>"#c8c8c888"</default>
+        </key>
+        <key name="background-style" enum="org.gnome.shell.extensions.workspace-indicator-plus.background-style">
+            <default>"COLOUR"</default>
+        </key>
+        <key name="border-colour" type="s">
+            <default>"#ccccccff"</default>
+        </key>
+        <key name="border-width" type="i">
+            <default>1</default>
+            <range min="0" max="16"/>
+        </key>
+        <key name="height" type="i">
+            <default>22</default>
+            <range min="0" max="64"/>
+        </key>
+        <key name="horizontal-padding" type="i">
+            <default>8</default>
+            <range min="0" max="32"/>
+        </key>
+        <key name="index" type="i">
+            <default>0</default>
+            <range min="-1" max="32"/>
+        </key>
+        <key name="position" type="i">
+            <default>1</default>
+            <range min="-1" max="1"/>
+        </key>
+        <key name="text-colour" type="s">
+            <default>"#ccccccff"</default>
+        </key>
+        <key name="text-size" type="i">
+            <default>12</default>
+            <range min="0" max="48"/>
+        </key>
+        <key name="text-style" enum="org.gnome.shell.extensions.workspace-indicator-plus.text-style">
+            <default>"NAME"</default>
+        </key>
+        <key name="use-automatic-height" type="b">
+            <default>true</default>
+        </key>
+        <key name="use-automatic-width" type="b">
+            <default>true</default>
+        </key>
+        <key name="use-shell-text-colour" type="b">
+            <default>true</default>
+        </key>
+        <key name="use-shell-text-size" type="b">
+            <default>true</default>
+        </key>
+        <key name="vertical-padding" type="i">
+            <default>8</default>
+            <range min="0" max="32"/>
+        </key>
+        <key name="width" type="i">
+            <default>64</default>
+            <range min="0" max="128"/>
+        </key>
     </schema>
 </schemalist>
