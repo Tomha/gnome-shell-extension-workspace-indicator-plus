@@ -81,7 +81,7 @@
 	        <summary>Whether button text should use the shell theme size, or be manually set.</summary>
         </key>
         <key name="vertical-padding" type="i">
-            <default>8</default>
+            <default>0</default>
             <range min="0" max="16"/>
 	        <summary>Pixel padding to use above and below of the button text.</summary>
         </key>
