@@ -10,7 +10,7 @@ This extension is currently under heavy development, and is not guaranteed to be
 
 Installation is more or less like installing any other extension from source:
 1. git clone `https://github.com/tomha/gnome-shell-extension-workspace-indicator-plus workspace-indicator-plus@tomha.github.com` (The destination folder name is important).
-2. `cp -r workspace-indicator-plus@tomha.github.com ~/.local/share/gnome-shell/extensions/ (Or clone directly to this location).
+2. `cp -r workspace-indicator-plus@tomha.github.com ~/.local/share/gnome-shell/extensions/` (Or clone directly to this location).
 3. Restart the Gnome Shell.
   - Under Xorg press ALT + F2, type r, and press ENTER.
   - Under Wayland log out and back in again.
