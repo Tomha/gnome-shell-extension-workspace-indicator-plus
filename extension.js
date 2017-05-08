@@ -38,11 +38,8 @@ const Settings = Me.imports.settings;
 
 // TODO: Font still needs to auto-align center ?
 // TODO: Need to size background image
-// TODO: Loading image needs more checks
-// TODO: Prefs UI needs tooltips
 // TODO: Prefs UI needs workspace section
 // TODO: Customise left/right click behaviour - list/overview/custom overview?
-// TODO: Tidy up prefs?
 
 function hexToRgbaString (hex) {
     let string = 'rgba(';

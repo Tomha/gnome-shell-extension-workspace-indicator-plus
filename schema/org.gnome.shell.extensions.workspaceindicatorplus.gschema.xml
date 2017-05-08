@@ -39,7 +39,7 @@
         </key>
         <key name="horizontal-padding" type="i">
             <default>8</default>
-            <range min="0" max="32"/>
+            <range min="0" max="16"/>
 	        <summary>Pixel padding to use left and right of the button text.</summary>
         </key>
         <key name="index" type="i">
@@ -82,7 +82,7 @@
         </key>
         <key name="vertical-padding" type="i">
             <default>8</default>
-            <range min="0" max="32"/>
+            <range min="0" max="16"/>
 	        <summary>Pixel padding to use above and below of the button text.</summary>
         </key>
         <key name="width" type="i">
