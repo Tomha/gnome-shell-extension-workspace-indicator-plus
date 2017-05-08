@@ -40,7 +40,6 @@ const Settings = Me.imports.settings;
 // TODO: Need to size background image
 // TODO: Loading image needs more checks
 // TODO: Prefs UI needs tooltips
-// TODO: Settings schema needs summaries
 // TODO: Prefs UI needs workspace section
 // TODO: Customise left/right click behaviour - list/overview/custom overview?
 // TODO: Tidy up prefs?
@@ -85,7 +84,7 @@ WorkspaceIndicator.prototype = {
 
     _getDesktopBackgroundUri: function () {
         let fullUri = this._desktopSettings.get_string('picture-uri');
-        let uri = fullUri.split(':')[1]; // too crude?
+        let uri = fullUri.split(':')[1].replace('%20', ' '); // too crude?
         return uri;
     },
 
@@ -116,7 +115,7 @@ WorkspaceIndicator.prototype = {
         if(this._backgroundStyle == 0)
             style += 'background-color:' + hexToRgbaString(this._backgroundColour) + ';';
         else
-            style += 'background-image:url(' + this._getDesktopBackgroundUri() + ');';
+            style += 'background-image:url(\"' + this._getDesktopBackgroundUri() + '\");';
         this._label.set_style(style);
     },
 
