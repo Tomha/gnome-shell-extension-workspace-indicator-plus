@@ -8,67 +8,87 @@
         <value value="0" nick="NAME"/>
         <value value="1" nick="NUMBER"/>
         <value value="2" nick="FRACTION"/>
-
+    </enum>
+    <enum id="org.gnome.shell.extensions.workspace-indicator-plus.position">
+        <value value="0" nick="LEFT"/>
+        <value value="1" nick="CENTER"/>
+        <value value="2" nick="RIGHT"/>
     </enum>
     <schema path="/org/gnome/shell/extensions/workspaceindicatorplus/" id="org.gnome.shell.extensions.workspace-indicator-plus">
         <key name="background-colour" type="s">
             <default>"#c8c8c888"</default>
+	        <summary>Hexidecimal RGBA colour to use for the button background.</summary>
         </key>
         <key name="background-style" enum="org.gnome.shell.extensions.workspace-indicator-plus.background-style">
             <default>"COLOUR"</default>
+	        <summary></summary>
         </key>
         <key name="border-colour" type="s">
             <default>"#ccccccff"</default>
+	        <summary>Hexidecimal RGBA colour to use for the button border.</summary>
         </key>
         <key name="border-width" type="i">
             <default>1</default>
             <range min="0" max="16"/>
+	        <summary>Pixel width to use for the button border.</summary>
         </key>
         <key name="height" type="i">
             <default>22</default>
             <range min="0" max="64"/>
+	        <summary>Pixel height to use for the button, excluding padding.</summary>
         </key>
         <key name="horizontal-padding" type="i">
             <default>8</default>
             <range min="0" max="32"/>
+	        <summary>Pixel padding to use left and right of the button text.</summary>
         </key>
         <key name="index" type="i">
             <default>0</default>
             <range min="-1" max="32"/>
+	        <summary>Index to place the button within the selected position.</summary>
         </key>
-        <key name="position" type="i">
-            <default>1</default>
-            <range min="-1" max="1"/>
+        <key name="position" enum="org.gnome.shell.extensions.workspace-indicator-plus.position">
+            <default>"RIGHT"</default>
+	        <summary>Position on the panel in which to palce the button.</summary>
         </key>
         <key name="text-colour" type="s">
             <default>"#ccccccff"</default>
+	        <summary>Hexidecimal RGBA colour to use for the button text.</summary>
         </key>
         <key name="text-size" type="i">
             <default>12</default>
             <range min="0" max="48"/>
+	        <summary>Pt size to use for the button text.</summary>
         </key>
         <key name="text-style" enum="org.gnome.shell.extensions.workspace-indicator-plus.text-style">
             <default>"NAME"</default>
+	        <summary>Style to determine how/what text is displayed.</summary>
         </key>
         <key name="use-automatic-height" type="b">
             <default>true</default>
+	        <summary>Whether height should be based on text + padding, or manually set.</summary>
         </key>
         <key name="use-automatic-width" type="b">
             <default>true</default>
+	        <summary>Whether width should be based on text + padding, or manually set.</summary>
         </key>
         <key name="use-shell-text-colour" type="b">
             <default>true</default>
+	        <summary>Whether button text should use the shell theme colour, or be manually set.</summary>
         </key>
         <key name="use-shell-text-size" type="b">
             <default>true</default>
+	        <summary>Whether button text should use the shell theme size, or be manually set.</summary>
         </key>
         <key name="vertical-padding" type="i">
             <default>8</default>
             <range min="0" max="32"/>
+	        <summary>Pixel padding to use above and below of the button text.</summary>
         </key>
         <key name="width" type="i">
             <default>64</default>
             <range min="0" max="128"/>
+	        <summary>Pixel width to use for the button, excluding padding.</summary>
         </key>
     </schema>
 </schemalist>

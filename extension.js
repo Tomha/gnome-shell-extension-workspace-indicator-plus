@@ -37,6 +37,13 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
 
 // TODO: Font still needs to auto-align center ?
+// TODO: Need to size background image
+// TODO: Loading image needs more checks
+// TODO: Prefs UI needs tooltips
+// TODO: Settings schema needs summaries
+// TODO: Prefs UI needs workspace section
+// TODO: Customise left/right click behaviour - list/overview/custom overview?
+// TODO: Tidy up prefs?
 
 function hexToRgbaString (hex) {
     let string = 'rgba(';
@@ -136,7 +143,7 @@ WorkspaceIndicator.prototype = {
         this._height = this._settings.get_int('height');
         this._horizontalPadding = this._settings.get_int('horizontal-padding');
         this._index = this._settings.get_int('index');
-        this._position = this._settings.get_int('position');
+        this._position = this._settings.get_enum('position');
         this._textColour = this._settings.get_string('text-colour');
         this._textSize = this._settings.get_int('text-size');
         this._textStyle = this._settings.get_enum('text-style');
@@ -180,7 +187,7 @@ WorkspaceIndicator.prototype = {
                 this.enable();
                 break;
             case 'position':
-                this._position = this._settings.get_int('position');
+                this._position = this._settings.get_enum('position');
                 this.disable();
                 this.enable();
                 break;
