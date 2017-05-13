@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License along with
 Workspace Indicator Plus; if not, see http://www.gnu.org/licenses/.
 
 An up to date version can also be found at:
-https://github.com/Tomha/gnome-shell-extension-workspeed-indicator-plus */
+https://github.com/Tomha/gnome-shell-extension-workspace-indicator-plus */
 
 const Clutter = imports.gi.Clutter;
 const Meta = imports.gi.Meta;

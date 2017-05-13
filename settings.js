@@ -3,7 +3,7 @@
 Based on the original Workspace Indicator code found in the stock Gnome Shell
 Extensions extension set.
 
-extension.js - Part of the Workspace Indicator Plus Gnome Shell Extension.
+settings.js - Part of the Workspace Indicator Plus Gnome Shell Extension.
 
 Workspace Indicator Plus is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by the Free
@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License along with
 Workspace Indicator Plus; if not, see http://www.gnu.org/licenses/.
 
 An up to date version can also be found at:
-https://github.com/Tomha/gnome-shell-extension-workspeed-indicator-plus */
+https://github.com/Tomha/gnome-shell-extension-workspace-indicator-plus */
 
 const Gio = imports.gi.Gio;
 const SchemaSource = imports.gi.Gio.SettingsSchemaSource;
